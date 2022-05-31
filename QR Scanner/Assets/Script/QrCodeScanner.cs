@@ -9,16 +9,23 @@ using ZXing;
 
 public class QrCodeScanner : MonoBehaviour
 {
-
+    //þifremizi tutan deðiþken
     public string userID;
-    public string sifre = "123";
+
+    //tekrar eden kullanýcý ismini karþýlaþtýrýrken kullandýðýmýz deðiþken
     public bool isfound;
+
+    //arr adýndaki listemiz
     public List<String> arr = new List<String>();
+
+
     private int SavedListCount;
 
     public Text Info;
     [SerializeField]
     private Text Password_Field;
+
+    //database'e baðlanmamýzý saðlayacak reference adýndaki nesne
     DatabaseReference reference;
 
     public string last = "   ";
@@ -52,76 +59,15 @@ public class QrCodeScanner : MonoBehaviour
     //WebCamTexture sýnýfýndan bir deðiþken üretiyoruz
     private WebCamTexture _cameraTexture;
 
-    //Listeyi temizlemizi saðlayan metot
-    public void Password_Check()
-    {
-
-        if (userID == Password_Field.text)
-        {
-            Login_Panel.gameObject.SetActive(false);
-        }
-        else
-        {
-            Info.text = "HATALI ÞÝFRE GÝRDÝNÝZ";
-            Login_Panel.gameObject.SetActive(true);
-        }
-
-
-    }
-    public void Delete()
-    {
-        sira_no = 1;
-        Set_List("old_list", liste.text);
-        Set_List("new_list", liste.text = "");
-        arr.Clear();
-
-    }
-    public void Get_Old()
-    {
-        reference.Child("old_list").GetValueAsync().ContinueWithOnMainThread(task =>
-        {
-            if (task.IsFaulted)
-            {
-                liste.text = "HATA!";
-                // Handle the error...
-            }
-            else if (task.IsCompleted)
-            {
-                DataSnapshot snapshot = task.Result;
-                liste.text = snapshot.Value.ToString();
-                // Do something with snapshot...
-            }
-
-        });
-    }
-    public void Get_New()
-    {
-        reference.Child("new_list").GetValueAsync().ContinueWithOnMainThread(task =>
-        {
-            if (task.IsFaulted)
-            {
-                liste.text = "VERÝTABANI HATASI!";
-                // Handle the error...
-            }
-            else if (task.IsCompleted)
-            {
-                DataSnapshot snapshot = task.Result;
-                liste.text = snapshot.Value.ToString();
-                // Do something with snapshot...
-            }
-
-        });
-    }
-    void Set_List(string list, string list_text)
-    {
-        reference.Child(list).SetValueAsync(list_text);
-    }
-
-    // Uygulama çalýþtýrýldýðýna otomatik olarak çalýþan baþlangýç metodu
+    /// <summary>
+    /// Uygulama çalýþtýrýldýðýna otomatik olarak çalýþan baþlangýç metodu
+    /// </summary>
     void Start()
     {
+        //database'e baðlanmamýzý saðlayan kod
         reference = FirebaseDatabase.DefaultInstance.RootReference;
 
+        //databaseden þifremizi alan ve bunu userID deðiþkenine atayan kod
         reference.Child("password").GetValueAsync().ContinueWithOnMainThread(task =>
         {
             DataSnapshot snapshot = task.Result;
@@ -137,13 +83,9 @@ public class QrCodeScanner : MonoBehaviour
 #endif
     }
 
-    //Kameramýzýn sürekli olarak çalýþmasýný saðlayan metot
-    void Update()
-    {
-        UpdateCameraRender();
-    }
-
-    //Kameramýzýn kullanýlabilir olup olmadýðýný kontrol eden metod
+    /// <summary>
+    /// Kameramýzýn kullanýlabilir olup olmadýðýný kontrol eden metod
+    /// </summary>
     private void SetUpCamera()
     {
 
@@ -181,7 +123,7 @@ public class QrCodeScanner : MonoBehaviour
 
 
     /// <summary>
-    /// kameramýzý çalýþtýran kod
+    /// kameramýzý sürekli çalýþmasýný saðlayan metot
     /// </summary>
     private void UpdateCameraRender()
     {
@@ -197,6 +139,98 @@ public class QrCodeScanner : MonoBehaviour
         _rawImageBackground.rectTransform.localEulerAngles = new Vector3(0, 0, orientation);
     }
     /// <summary>
+    /// Þifre kontrolü yaparak uygulamanýn açýlmasýný saðlayan metot
+    /// </summary>
+    public void Password_Check()
+    {
+
+        if (userID == Password_Field.text)
+        {
+            Login_Panel.gameObject.SetActive(false);
+        }
+        else
+        {
+            Info.text = "HATALI ÞÝFRE GÝRDÝNÝZ";
+            Login_Panel.gameObject.SetActive(true);
+        }
+
+
+    }
+    /// <summary>
+    /// Listeyi silme iþlemini yapan metot
+    /// </summary>
+    public void Delete()
+    {
+        sira_no = 1;
+        Set_List("old_list", liste.text);
+        Set_List("new_list", liste.text = "");
+        arr.Clear();
+
+    }
+
+    /// <summary>
+    /// eski listeyi ekrana getiren metot
+    /// </summary>
+    public void Get_Old()
+    {
+        reference.Child("old_list").GetValueAsync().ContinueWithOnMainThread(task =>
+        {
+            if (task.IsFaulted)
+            {
+                liste.text = "HATA!";
+                // Handle the error...
+            }
+            else if (task.IsCompleted)
+            {
+                DataSnapshot snapshot = task.Result;
+                liste.text = snapshot.Value.ToString();
+                // Do something with snapshot...
+            }
+
+        });
+    }
+
+    /// <summary>
+    /// Yeni listeyi ekrana getiren metot
+    /// </summary>
+    public void Get_New()
+    {
+        reference.Child("new_list").GetValueAsync().ContinueWithOnMainThread(task =>
+        {
+            if (task.IsFaulted)
+            {
+                liste.text = "VERÝTABANI HATASI!";
+                // Handle the error...
+            }
+            else if (task.IsCompleted)
+            {
+                DataSnapshot snapshot = task.Result;
+                liste.text = snapshot.Value.ToString();
+                // Do something with snapshot...
+            }
+
+        });
+    }
+
+    /// <summary>
+    /// listeyi database'e gönderen kod
+    /// </summary>
+    /// <param name="list"></param>
+    /// <param name="list_text"></param>
+    void Set_List(string list, string list_text)
+    {
+        reference.Child(list).SetValueAsync(list_text);
+    }
+
+    
+    //Kameramýzýn sürekli olarak çalýþmasýný saðlayan metot
+    void Update()
+    {
+        UpdateCameraRender();
+    }
+
+    
+    /// <summary>
     /// Buton'a basýldýðýnda çalýþacak metod
     /// </summary>
     public void OnClickScan()
@@ -204,47 +238,10 @@ public class QrCodeScanner : MonoBehaviour
         Scan();
 
     }
-
     /// <summary>
-    /// Okunan ve listeye eklenecek olan QR'ýn daha öncede listemizde olup olmadýðýný kontrol eden metod
+    /// QR kodu tarayýp algýlayan ve algýladýðý kodu listeye ekleyen ve QR kodun daha önceden listede olup olmadýðýný
+    /// kontrol eden metot.
     /// </summary>
-    /// <param name="wanted"></param>
-    /// <returns></returns>
-    bool Search(string wanted)
-    {
-        //"arr" adýndaki listemizin elemanlarýný alfabetik olarak sýralýyor.
-        arr.Sort();
-        //listemizin içersinde Binary Search algoritmasý ile liste içerisinde parametre olarak gönderdiðimiz elemaný arýyor
-        //ve buluabilirse bu elemanýn index'ini index deðiþkenine atýyor.
-        //(C# BinarySearch metodunu içerisinde barýndýðýndan tekrardan kendimiz yazmamýza gerek kalmýyor.)
-        int index = arr.BinarySearch(wanted);
-        //eðer liste içerisinde aranan elemaný bulabilirse index 0 veya 0'dan büyük olacaktýr.
-        //Böylece index<0 ise false deðil ise true deðerini geriye döndürecektir.
-        if (index < 0)
-            return false;
-        else
-            return true;
-    }
-    public void Save_List_To_PP()
-    {
-        for (int i = 0; i < arr.Count; i++)
-            PlayerPrefs.SetString("Players" + i, arr[i]);
-
-        PlayerPrefs.SetInt("Count",arr.Count);
-    }
-
-    public void Load_List_On_PP()
-    {
-        arr.Clear();
-        SavedListCount=PlayerPrefs.GetInt("Count");
-
-        for(int i=0;i<SavedListCount;i++)
-        {
-            string player = PlayerPrefs.GetString("Players" + i);
-            arr.Add(player);
-        }
-    }
-    //QR kodu tarayýp algýlayan ve algýladýðý kodu listeye ekleyen metot
     private void Scan()
     {
         //Try Catch bloðu sayesinde programda oluþacak hatalarý yakalýyoruz.
@@ -292,4 +289,49 @@ public class QrCodeScanner : MonoBehaviour
             _textOut.text = "UYGULAMA HATASI!";
         }
     }
+    /// <summary>
+    /// Okunan ve listeye eklenecek olan QR'ýn daha öncede listemizde olup olmadýðýný kontrol eden metod
+    /// </summary>
+    /// <param name="wanted"></param>
+    /// <returns></returns>
+    bool Search(string wanted)
+    {
+        //"arr" adýndaki listemizin elemanlarýný alfabetik olarak sýralýyor.
+        arr.Sort();
+        //listemizin içersinde Binary Search algoritmasý ile liste içerisinde parametre olarak gönderdiðimiz elemaný arýyor
+        //ve buluabilirse bu elemanýn index'ini index deðiþkenine atýyor.
+        //(C# BinarySearch metodunu içerisinde barýndýðýndan tekrardan kendimiz yazmamýza gerek kalmýyor.)
+        int index = arr.BinarySearch(wanted);
+        //eðer liste içerisinde aranan elemaný bulabilirse index 0 veya 0'dan büyük olacaktýr.
+        //Böylece index<0 ise false deðil ise true deðerini geriye döndürecektir.
+        if (index < 0)
+            return false;
+        else
+            return true;
+    }
+
+    /// <summary>
+    /// Uygulama kapatýldýðýnda listenin hafýzadan silinmesini engelleyen kod böylece uygulama kapatýlýp açýldýðýnda QR kodun
+    /// daha önceden listede olup olmadýðý kontrolü saðlýklý bir þekilde yapýlabiliyor.
+    /// </summary>
+    public void Save_List_To_PP()
+    {
+        for (int i = 0; i < arr.Count; i++)
+            PlayerPrefs.SetString("Players" + i, arr[i]);
+
+        PlayerPrefs.SetInt("Count",arr.Count);
+    }
+
+    public void Load_List_On_PP()
+    {
+        arr.Clear();
+        SavedListCount=PlayerPrefs.GetInt("Count");
+
+        for(int i=0;i<SavedListCount;i++)
+        {
+            string player = PlayerPrefs.GetString("Players" + i);
+            arr.Add(player);
+        }
+    }
+    
 }

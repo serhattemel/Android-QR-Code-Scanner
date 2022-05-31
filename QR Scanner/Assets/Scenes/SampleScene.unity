@@ -2613,7 +2613,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   userID: 
-  sifre: 123
   isfound: 0
   arr: []
   Info: {fileID: 1012898399}
